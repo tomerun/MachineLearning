@@ -4,6 +4,7 @@ import info.tomerun.ml.util.MultiSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class NaiveBayesClassifier<T extends FeatureSet> {
 
@@ -23,7 +24,7 @@ public class NaiveBayesClassifier<T extends FeatureSet> {
 		this.pseudocount = pseudocount;
 	}
 
-	public void train(ArrayList<T> dataSet) {
+	public void train(List<T> dataSet) {
 		this.trainDataSize = dataSet.size();
 		this.featureSize = dataSet.get(0).featureSize();
 		if (this.weight == null) {
@@ -74,7 +75,7 @@ public class NaiveBayesClassifier<T extends FeatureSet> {
 			}
 		}
 
-		void train(ArrayList<T> dataSet) {
+		void train(List<T> dataSet) {
 			for (T data : dataSet) {
 				int fv = data.feature(this.featureId);
 				this.count.get(data.label()).add(fv);

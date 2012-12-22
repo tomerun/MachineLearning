@@ -1,32 +1,34 @@
 package info.tomerun.ml;
+
 import info.tomerun.ml.util.MultiSet;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class RandomForest<T extends FeatureSet> {
 
-	ArrayList<DecisionTree<T>> trees;
-	int treeCount;
-	int featureCount;
-	int nMin;
-	Random rand = new Random();
+	private ArrayList<DecisionTree<T>> trees;
+	private int treeCount;
+	private int featureCount;
+	private int nMin;
+	private Random rand = new Random();
 
-	RandomForest() {
+	public RandomForest() {
 		this.treeCount = 100;
 		this.trees = new ArrayList<DecisionTree<T>>(100);
 		this.featureCount = 3;
 		this.nMin = 1;
 	}
 
-	RandomForest(int treeC, int featureC, int nMin) {
+	public RandomForest(int treeC, int featureC, int nMin) {
 		this.treeCount = treeC;
 		this.trees = new ArrayList<DecisionTree<T>>(treeC);
 		this.featureCount = featureC;
 		this.nMin = nMin;
 	}
 
-	void train(ArrayList<T> ps) {
+	public void train(List<T> ps) {
 		for (int i = 0; i < this.treeCount; ++i) {
 			DecisionTree<T> tree = new DecisionTree<T>(nMin, this.featureCount);
 			ArrayList<T> ensemble = new ArrayList<T>(ps.size());
@@ -38,8 +40,7 @@ public class RandomForest<T extends FeatureSet> {
 		}
 	}
 
-	int classify(T testVal) {
-
+	public int classify(T testVal) {
 		MultiSet<Integer> count = new MultiSet<Integer>();
 		for (DecisionTree<T> tree : this.trees) {
 			count.add(tree.classify(testVal));
