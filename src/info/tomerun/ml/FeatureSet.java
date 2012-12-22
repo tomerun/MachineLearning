@@ -1,5 +1,8 @@
 package info.tomerun.ml;
 
+/**
+ * 各素性が整数値を持つテストデータ1つを表す。
+ */
 public interface FeatureSet {
 	
 	/**
