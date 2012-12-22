@@ -65,8 +65,8 @@ public class NaiveBayesClassifier<T extends FeatureSet> {
 
 	private class Feature {
 
-		int featureId;
-		ArrayList<MultiSet<Integer>> count = new ArrayList<MultiSet<Integer>>();
+		private int featureId;
+		private ArrayList<MultiSet<Integer>> count = new ArrayList<MultiSet<Integer>>();
 
 		Feature(int fid) {
 			this.featureId = fid;

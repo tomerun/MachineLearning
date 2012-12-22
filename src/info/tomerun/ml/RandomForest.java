@@ -21,6 +21,11 @@ public class RandomForest<T extends FeatureSet> {
 		this.nMin = 1;
 	}
 
+	/**
+	 * @param treeC count of decision trees
+	 * @param featureC count of used features in a decision tree
+	 * @param nMin minimum count of dividing
+	 */
 	public RandomForest(int treeC, int featureC, int nMin) {
 		this.treeCount = treeC;
 		this.trees = new ArrayList<DecisionTree<T>>(treeC);
@@ -30,7 +35,7 @@ public class RandomForest<T extends FeatureSet> {
 
 	public void train(List<T> ps) {
 		for (int i = 0; i < this.treeCount; ++i) {
-			DecisionTree<T> tree = new DecisionTree<T>(nMin, this.featureCount);
+			DecisionTree<T> tree = new DecisionTree<T>(this.nMin, this.featureCount);
 			ArrayList<T> ensemble = new ArrayList<T>(ps.size());
 			for (int j = 0; j < ps.size(); ++j) {
 				ensemble.add(ps.get(rand.nextInt(ps.size())));

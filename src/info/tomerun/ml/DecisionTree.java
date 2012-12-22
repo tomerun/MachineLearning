@@ -46,7 +46,7 @@ public class DecisionTree<T extends FeatureSet> {
 		return current.label();
 	}
 
-	class Node {
+	private class Node {
 		private Node left, right;
 		private List<T> trainData;
 		private MultiSet<Integer> count = new MultiSet<Integer>();

@@ -4,8 +4,8 @@ import info.tomerun.ml.FeatureSet;
 
 public class Sentence implements FeatureSet {
 
-	int label;
-	int[] ratio;
+	private int label;
+	private int[] ratio;
 
 	Sentence(byte[] bytes, int encodingLabel) {
 		this.label = encodingLabel;
