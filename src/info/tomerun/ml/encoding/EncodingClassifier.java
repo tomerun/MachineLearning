@@ -10,7 +10,6 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -27,31 +26,24 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
+/**
+ * 文字コードの推定を機械学習で行う。
+ */
 public class EncodingClassifier {
 
-	private static String fullWidthPunctuation = "！”＃＄％＆’（）＝〜｜−＾￥＠＋＊；：＜＞，．／・？＿［］｛｝";
-	private static String halfWidthPunctuation = "!\"#$%&'()=~|-^¥@+*;:<>,./･?_[]{}";
-	private static HashMap<Character, Character> fullHalfMapping;
-	private static String[] encodingName = { "UTF-8", "UTF-16LE", "Shift_JIS", "EUC-JP" };
+	private static final String fullWidthPunctuation = "！”＃＄％＆’（）＝〜｜−＾￥＠＋＊；：＜＞，．／・？＿［］｛｝";
+	private static final String halfWidthPunctuation = "!\"#$%&'()=~|-^¥@+*;:<>,./･?_[]{}";
+	private static final HashMap<Character, Character> fullHalfMapping = new HashMap<Character, Character>();
+	private static final String[] encodingName = { "UTF-8", "UTF-16LE", "Shift_JIS", "EUC-JP" };
 	private static Random rand = new Random(42);
 	private static final int SIZE = 1000;
 
 	public static void main(String[] args) throws Exception {
-		fullHalfMapping = new HashMap<Character, Character>();
 		for (int i = 0; i < fullWidthPunctuation.length(); ++i) {
 			fullHalfMapping.put(fullWidthPunctuation.charAt(i), halfWidthPunctuation.charAt(i));
 		}
 		String[] source = input();
 		byte[][][] bytes = encode(source);
-
-		for (int i = 0; i < SIZE; ++i) {
-			for (int j = 0; j < encodingName.length; ++j) {
-				FileOutputStream out = new FileOutputStream(new File(String.format("%s/%04d.dat", encodingName[j], i)));
-				out.write(bytes[i][j]);
-				out.close();
-			}
-		}
-		System.exit(0);
 
 		//		drawImage(bytes);
 		byte[][][] trainingBytes = new byte[SIZE / 2][encodingName.length][];
@@ -65,12 +57,6 @@ public class EncodingClassifier {
 				testSet[i * encodingName.length + j] = new Sentence(testBytes[i][j], j);
 			}
 		}
-		int[] hist = new int[21];
-		for (Sentence s : trainingSet) {
-			for (int i = 0; i < s.featureSize(); ++i) {
-				hist[s.feature(i)]++;
-			}
-		}
 		//		classifyNaiveBayes(trainingSet, testSet);
 		classifyRandomForest(trainingSet, testSet);
 	}
@@ -80,7 +66,7 @@ public class EncodingClassifier {
 		Scanner sc = new Scanner(new File(url.toURI()), "utf-8");
 		String[] source = new String[SIZE];
 		for (int i = 0; i < SIZE; ++i) {
-			source[i] = sc.nextLine().replaceAll("[ 　\u00a0]", "").replaceAll("^＾", "");
+			source[i] = sc.nextLine().replaceAll("[ 　\u00a0]", "").replaceAll("^＾", ""); // u00a0 is &nbsp; 
 			if (rand.nextBoolean()) {
 				source[i] = convertFullToHalf(source[i]);
 			}
@@ -193,16 +179,16 @@ public class EncodingClassifier {
 		}
 
 		// draw Lines
-		g.setColor(Color.BLACK);
-		g.drawLine(LEFT + MARGIN, TOP + MARGIN, WIDTH - MARGIN, TOP + MARGIN);
-		g.drawLine(LEFT + MARGIN, TOP + MARGIN, LEFT + MARGIN, HEIGHT - MARGIN);
-		g.drawLine(LEFT + MARGIN, TOP + MARGIN + CELL * 16, WIDTH - MARGIN, TOP + MARGIN + CELL * 16);
-		g.drawLine(LEFT + MARGIN + CELL * 16, TOP + MARGIN, LEFT + MARGIN + CELL * 16, HEIGHT - MARGIN);
 		g.setColor(Color.LIGHT_GRAY);
 		for (int i = 1; i < 16; ++i) {
 			g.drawLine(LEFT + MARGIN, TOP + MARGIN + CELL * i, WIDTH - MARGIN, TOP + MARGIN + CELL * i); // horz
 			g.drawLine(LEFT + MARGIN + CELL * i, TOP + MARGIN, LEFT + MARGIN + CELL * i, HEIGHT - MARGIN); // vert
 		}
+		g.setColor(Color.BLACK);
+		g.drawLine(LEFT + MARGIN, TOP + MARGIN, WIDTH - MARGIN, TOP + MARGIN);
+		g.drawLine(LEFT + MARGIN, TOP + MARGIN, LEFT + MARGIN, HEIGHT - MARGIN);
+		g.drawLine(LEFT + MARGIN, TOP + MARGIN + CELL * 16, WIDTH - MARGIN, TOP + MARGIN + CELL * 16);
+		g.drawLine(LEFT + MARGIN + CELL * 16, TOP + MARGIN, LEFT + MARGIN + CELL * 16, HEIGHT - MARGIN);
 
 		ImageIO.write(image, "png", new File(encoding + ".png"));
 	}
@@ -213,6 +199,7 @@ public class EncodingClassifier {
 		g.drawString(str, (int) (x - rect.getWidth() / 2), (int) (y + rect.getHeight() / 2));
 	}
 
+	// bytesを訓練データとテストデータに振り分ける
 	private static void select(byte[][][] bytes, byte[][][] train, byte[][][] test) {
 		ArrayList<Integer> index = new ArrayList<Integer>();
 		for (int i = 0; i < SIZE; ++i) {
