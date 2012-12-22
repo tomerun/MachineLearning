@@ -27,7 +27,7 @@ public class DecisionTree<T extends FeatureSet> {
 			}
 		});
 		q.add(this.root);
-		for (int i = 1; i < nodeCount && !q.isEmpty(); ++i) {
+		for (int i = 1; i <= nodeCount && !q.isEmpty(); ++i) {
 			Node cur = q.poll();
 			if (cur.entropy() == 0) break;
 			cur.split();
@@ -171,6 +171,7 @@ public class DecisionTree<T extends FeatureSet> {
 					rightData.add(val);
 				}
 			}
+			this.trainData.clear();
 			this.left = new Node(leftData);
 			this.right = new Node(rightData);
 		}
